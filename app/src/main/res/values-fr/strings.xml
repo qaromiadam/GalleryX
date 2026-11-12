@@ -49,6 +49,9 @@
     <string name="delete_confirm_message">Voulez-vous vraiment supprimer definitivement ce fichier du stockage ?</string>
     <string name="delete_success">Fichier supprime</string>
     <string name="delete_failed">Impossible de supprimer le fichier</string>
+    <string name="selected_count">%1$d selectionne(s)</string>
+    <string name="action_select_all">Tout selectionner</string>
+    <string name="delete_multiple_confirm_message">Voulez-vous vraiment supprimer definitivement les %1$d fichiers selectionnes du stockage ?</string>
     <string name="info_sheet_title">Informations du media</string>
     <string name="info_filename">Nom du fichier</string>
     <string name="info_folder">Dossier</string>
@@ -150,4 +153,8 @@
     <string name="color_red">Rouge</string>
     <string name="color_green">Vert</string>
     <string name="color_blue">Bleu</string>
+    <string name="selected_photos_count">%1$d images</string>
+    <string name="selected_videos_count">%1$d videos</string>
+    <string name="selected_audio_count">%1$d audio</string>
+    <string name="cd_select_date_section">Tout selectionner pour %1$s</string>
 </resources>

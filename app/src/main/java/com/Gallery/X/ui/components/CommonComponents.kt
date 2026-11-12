@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -53,6 +55,7 @@ import com.Gallery.X.R
 import com.Gallery.X.data.CapabilityMode
 import com.Gallery.X.data.ExportState
 import com.Gallery.X.data.FormatCapabilityResolution
+import com.Gallery.X.data.SelectionBreakdown
 import com.Gallery.X.ui.icons.AppIcons
 import java.util.Locale
 
@@ -489,6 +492,198 @@ fun DeleteConfirmDialog(
             Button(
                 onClick = onConfirm,
                 modifier = Modifier.testTag("confirm_delete_button")
+            ) {
+                Text(stringResource(R.string.action_delete))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.action_cancel))
+            }
+        }
+    )
+}
+
+@Composable
+fun SelectionTopBar(
+    breakdown: SelectionBreakdown,
+    allSelected: Boolean,
+    onClearSelection: () -> Unit,
+    onToggleSelectAll: () -> Unit,
+    onShareSelected: () -> Unit,
+    onDeleteSelected: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .widthIn(max = 640.dp)
+            .testTag("selection_top_bar"),
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.primaryContainer,
+        tonalElevation = 4.dp,
+        shadowElevation = 6.dp,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f))
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+                    .padding(horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = onClearSelection,
+                    modifier = Modifier
+                        .minimumInteractiveComponentSize()
+                        .testTag("clear_selection_button")
+                ) {
+                    Icon(
+                        imageVector = AppIcons.Clear,
+                        contentDescription = stringResource(R.string.action_cancel),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+                Text(
+                    text = stringResource(R.string.selected_count, breakdown.total),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                TextButton(
+                    onClick = onToggleSelectAll,
+                    modifier = Modifier
+                        .minimumInteractiveComponentSize()
+                        .testTag("select_all_button")
+                ) {
+                    Text(
+                        text = if (allSelected) stringResource(R.string.action_reset) else stringResource(R.string.action_select_all),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                IconButton(
+                    onClick = onShareSelected,
+                    enabled = breakdown.total > 0,
+                    modifier = Modifier
+                        .minimumInteractiveComponentSize()
+                        .testTag("batch_share_button")
+                ) {
+                    Icon(
+                        imageVector = AppIcons.Share,
+                        contentDescription = stringResource(R.string.cd_share),
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+                IconButton(
+                    onClick = onDeleteSelected,
+                    enabled = breakdown.total > 0,
+                    modifier = Modifier
+                        .minimumInteractiveComponentSize()
+                        .testTag("batch_delete_button")
+                ) {
+                    Icon(
+                        imageVector = AppIcons.DeleteFilled,
+                        contentDescription = stringResource(R.string.cd_delete),
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+
+            if (breakdown.photos > 0 || breakdown.videos > 0 || breakdown.audio > 0) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                        .padding(start = 14.dp, end = 14.dp, bottom = 10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (breakdown.photos > 0) {
+                        SelectionCountPill(
+                            icon = AppIcons.PhotosFilled,
+                            label = stringResource(R.string.selected_photos_count, breakdown.photos),
+                            testTag = "selected_photos_badge"
+                        )
+                    }
+                    if (breakdown.videos > 0) {
+                        SelectionCountPill(
+                            icon = AppIcons.VideosFilled,
+                            label = stringResource(R.string.selected_videos_count, breakdown.videos),
+                            testTag = "selected_videos_badge"
+                        )
+                    }
+                    if (breakdown.audio > 0) {
+                        SelectionCountPill(
+                            icon = AppIcons.AudioFilled,
+                            label = stringResource(R.string.selected_audio_count, breakdown.audio),
+                            testTag = "selected_audio_badge"
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SelectionCountPill(
+    icon: ImageVector,
+    label: String,
+    testTag: String
+) {
+    Surface(
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)),
+        modifier = Modifier.testTag(testTag)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(14.dp)
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1
+            )
+        }
+    }
+}
+
+@Composable
+fun DeleteMultipleConfirmDialog(
+    count: Int,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                imageVector = AppIcons.DeleteFilled,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error
+            )
+        },
+        title = { Text(stringResource(R.string.delete_confirm_title)) },
+        text = {
+            Text(stringResource(R.string.delete_multiple_confirm_message, count))
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                modifier = Modifier.testTag("confirm_batch_delete_button")
             ) {
                 Text(stringResource(R.string.action_delete))
             }

@@ -49,6 +49,9 @@
     <string name="delete_confirm_message">Are you sure you want to permanently delete this file from device storage?</string>
     <string name="delete_success">File deleted</string>
     <string name="delete_failed">Could not delete file</string>
+    <string name="selected_count">%1$d selected</string>
+    <string name="action_select_all">Select All</string>
+    <string name="delete_multiple_confirm_message">Are you sure you want to permanently delete %1$d selected files from device storage?</string>
     <string name="info_sheet_title">Media Information</string>
     <string name="info_filename">File Name</string>
     <string name="info_folder">Folder</string>
@@ -150,4 +153,8 @@
     <string name="color_red">Red</string>
     <string name="color_green">Green</string>
     <string name="color_blue">Blue</string>
+    <string name="selected_photos_count">%1$d Images</string>
+    <string name="selected_videos_count">%1$d Videos</string>
+    <string name="selected_audio_count">%1$d Audio</string>
+    <string name="cd_select_date_section">Select all in %1$s</string>
 </resources>

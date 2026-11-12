@@ -49,6 +49,9 @@
     <string name="delete_confirm_message">هل أنت متأكد من حذف هذا الملف نهائيا من ذاكرة الجهاز؟</string>
     <string name="delete_success">تم حذف الملف</string>
     <string name="delete_failed">تعذر حذف الملف</string>
+    <string name="selected_count">تم تحديد %1$d</string>
+    <string name="action_select_all">تحديد الكل</string>
+    <string name="delete_multiple_confirm_message">هل أنت متأكد من حذف %1$d ملفات محددة نهائيا من ذاكرة الجهاز؟</string>
     <string name="info_sheet_title">بيانات الوسائط</string>
     <string name="info_filename">اسم الملف</string>
     <string name="info_folder">المجلد</string>
@@ -150,4 +153,8 @@
     <string name="color_red">أحمر</string>
     <string name="color_green">أخضر</string>
     <string name="color_blue">أزرق</string>
+    <string name="selected_photos_count">%1$d صور</string>
+    <string name="selected_videos_count">%1$d فيديو</string>
+    <string name="selected_audio_count">%1$d صوت</string>
+    <string name="cd_select_date_section">تحديد الكل في %1$s</string>
 </resources>

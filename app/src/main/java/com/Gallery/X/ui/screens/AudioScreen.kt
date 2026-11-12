@@ -1,8 +1,10 @@
 package com.Gallery.X.ui.screens
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +39,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -60,7 +64,9 @@ fun AudioScreen(
     onPlayOrToggle: (MediaItem) -> Unit,
     onEditAudio: (MediaItem) -> Unit,
     onScrollStateChanged: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    selectedIds: Set<Long> = emptySet(),
+    onToggleSelect: (MediaItem) -> Unit = {}
 ) {
     val listState = rememberLazyListState()
     val isScrolled by remember {
@@ -102,12 +108,17 @@ fun AudioScreen(
                     contentType = { "audio_row" }
                 ) { audio ->
                     val isCurrent = playerState.currentTrack?.uri == audio.uri
+                    val isSelectionMode = selectedIds.isNotEmpty()
+                    val isSelected = audio.id in selectedIds
                     AudioRowCard(
                         item = audio,
                         isCurrent = isCurrent,
                         isPlaying = isCurrent && playerState.isPlaying,
-                        onPlayToggle = { onPlayOrToggle(audio) },
-                        onEdit = { onEditAudio(audio) }
+                        isSelectionMode = isSelectionMode,
+                        isSelected = isSelected,
+                        onPlayOrToggle = onPlayOrToggle,
+                        onToggleSelect = onToggleSelect,
+                        onEdit = onEditAudio
                     )
                 }
             }
@@ -115,30 +126,43 @@ fun AudioScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun AudioRowCard(
     item: MediaItem,
     isCurrent: Boolean,
     isPlaying: Boolean,
-    onPlayToggle: () -> Unit,
-    onEdit: () -> Unit
+    isSelectionMode: Boolean,
+    isSelected: Boolean,
+    onPlayOrToggle: (MediaItem) -> Unit,
+    onToggleSelect: (MediaItem) -> Unit,
+    onEdit: (MediaItem) -> Unit
 ) {
+    val haptics = LocalHapticFeedback.current
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onPlayToggle)
+            .combinedClickable(
+                onClick = {
+                    if (isSelectionMode) onToggleSelect(item) else onPlayOrToggle(item)
+                },
+                onLongClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onToggleSelect(item)
+                }
+            )
             .testTag("audio_item_${item.id}"),
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(
-            containerColor = if (isCurrent) {
-                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
-            } else {
-                MaterialTheme.colorScheme.surface
+            containerColor = when {
+                isSelected -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.72f)
+                isCurrent -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
+                else -> MaterialTheme.colorScheme.surface
             }
         ),
         border = BorderStroke(
-            width = 1.dp,
-            color = if (isCurrent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+            width = if (isSelected) 1.5.dp else 1.dp,
+            color = if (isSelected || isCurrent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
         )
     ) {
         Row(
@@ -152,19 +176,20 @@ private fun AudioRowCard(
                     .size(48.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(
-                        if (isCurrent) MaterialTheme.colorScheme.primary
+                        if (isSelected || isCurrent) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.surfaceVariant
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = when {
+                        isSelected -> AppIcons.Check
                         isPlaying -> AppIcons.Pause
                         isCurrent -> AppIcons.Play
                         else -> AppIcons.StudioWaveformEmblem
                     },
                     contentDescription = stringResource(R.string.cd_waveform),
-                    tint = if (isCurrent) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
+                    tint = if (isSelected || isCurrent) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -216,7 +241,7 @@ private fun AudioRowCard(
             )
 
             IconButton(
-                onClick = onEdit,
+                onClick = { onEdit(item) },
                 modifier = Modifier
                     .minimumInteractiveComponentSize()
                     .testTag("audio_edit_button_${item.id}")

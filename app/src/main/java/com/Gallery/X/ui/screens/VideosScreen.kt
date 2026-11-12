@@ -6,8 +6,11 @@ import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -52,8 +55,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -88,7 +94,9 @@ fun VideosScreen(
     onSelectFolder: (String?) -> Unit,
     onVideoClick: (MediaItem) -> Unit,
     onScrollStateChanged: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    selectedIds: Set<Long> = emptySet(),
+    onToggleSelect: (MediaItem) -> Unit = {}
 ) {
     val gridState = rememberLazyGridState()
     val isScrolled by remember {
@@ -130,9 +138,14 @@ fun VideosScreen(
                     key = { it.id },
                     contentType = { "video_tile" }
                 ) { video ->
+                    val isSelectionMode = selectedIds.isNotEmpty()
+                    val isSelected = video.id in selectedIds
                     VideoGridTile(
                         item = video,
-                        onClick = { onVideoClick(video) }
+                        isSelectionMode = isSelectionMode,
+                        isSelected = isSelected,
+                        onVideoClick = onVideoClick,
+                        onToggleSelect = onToggleSelect
                     )
                 }
             }
@@ -140,18 +153,22 @@ fun VideosScreen(
     }
 }
 
+@kotlin.OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun VideoGridTile(
     item: MediaItem,
-    onClick: () -> Unit
+    isSelectionMode: Boolean,
+    isSelected: Boolean,
+    onVideoClick: (MediaItem) -> Unit,
+    onToggleSelect: (MediaItem) -> Unit
 ) {
     val context = LocalContext.current
+    val haptics = LocalHapticFeedback.current
     val request = remember(item.uri) {
         ImageRequest.Builder(context)
             .data(item.uri)
-            .size(400)
+            .size(280)
             .allowHardware(true)
-            .crossfade(true)
             .build()
     }
 
@@ -160,15 +177,65 @@ private fun VideoGridTile(
             .aspectRatio(1f)
             .clip(RoundedCornerShape(6.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .clickable(onClick = onClick)
+            .then(
+                if (isSelected) {
+                    Modifier.border(2.5.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(6.dp))
+                } else {
+                    Modifier
+                }
+            )
+            .combinedClickable(
+                onClick = {
+                    if (isSelectionMode) onToggleSelect(item) else onVideoClick(item)
+                },
+                onLongClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onToggleSelect(item)
+                }
+            )
             .testTag("video_tile_${item.id}")
     ) {
         AsyncImage(
             model = request,
             contentDescription = item.displayName,
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    val s = if (isSelected) 0.90f else 1f
+                    scaleX = s
+                    scaleY = s
+                }
         )
+
+        if (isSelectionMode) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(6.dp)
+                    .size(22.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (isSelected) MaterialTheme.colorScheme.primary
+                        else Color.Black.copy(alpha = 0.45f)
+                    )
+                    .border(
+                        width = 1.5.dp,
+                        color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                if (isSelected) {
+                    Icon(
+                        imageVector = AppIcons.Check,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(14.dp)
+                    )
+                }
+            }
+        }
 
         // Subtle center play icon
         Box(

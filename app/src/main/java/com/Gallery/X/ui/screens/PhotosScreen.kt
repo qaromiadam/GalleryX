@@ -6,7 +6,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
@@ -58,11 +60,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -89,7 +94,10 @@ fun PhotosScreen(
     onSelectFolder: (String?) -> Unit,
     onPhotoClick: (MediaItem) -> Unit,
     onScrollStateChanged: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    selectedIds: Set<Long> = emptySet(),
+    onToggleSelect: (MediaItem) -> Unit = {},
+    onToggleDateSection: (List<MediaItem>) -> Unit = {}
 ) {
     val gridState = rememberLazyGridState()
     val isScrolled by remember {
@@ -100,6 +108,8 @@ fun PhotosScreen(
     LaunchedEffect(isScrolled) {
         onScrollStateChanged(isScrolled)
     }
+
+    val isSelectionMode = selectedIds.isNotEmpty()
 
     Column(modifier = modifier.fillMaxSize()) {
         FolderFilterChipBar(
@@ -132,18 +142,76 @@ fun PhotosScreen(
                         span = { GridItemSpan(maxLineSpan) },
                         contentType = "date_header"
                     ) {
+                        val allSectionSelected = remember(isSelectionMode, section.items, selectedIds) {
+                            isSelectionMode && section.items.isNotEmpty() && section.items.all { it.id in selectedIds }
+                        }
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 10.dp, vertical = 10.dp),
+                                .padding(
+                                    start = if (isSelectionMode) 2.dp else 10.dp,
+                                    end = 10.dp,
+                                    top = if (isSelectionMode) 2.dp else 10.dp,
+                                    bottom = if (isSelectionMode) 2.dp else 10.dp
+                                ),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(
-                                text = section.dateLabel,
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.onBackground
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                if (isSelectionMode) {
+                                    Box(
+                                        modifier = Modifier
+                                            .minimumInteractiveComponentSize()
+                                            .clip(CircleShape)
+                                            .clickable(
+                                                role = Role.Checkbox,
+                                                onClickLabel = stringResource(R.string.cd_select_date_section, section.dateLabel),
+                                                onClick = { onToggleDateSection(section.items) }
+                                            )
+                                            .testTag("date_select_circle_${section.dateLabel}"),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(22.dp)
+                                                .clip(CircleShape)
+                                                .background(
+                                                    if (allSectionSelected) MaterialTheme.colorScheme.primary
+                                                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                                                )
+                                                .border(
+                                                    width = 1.6.dp,
+                                                    color = if (allSectionSelected) {
+                                                        MaterialTheme.colorScheme.primary
+                                                    } else {
+                                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                                    },
+                                                    shape = CircleShape
+                                                ),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            if (allSectionSelected) {
+                                                Icon(
+                                                    imageVector = AppIcons.Check,
+                                                    contentDescription = stringResource(R.string.cd_select_date_section, section.dateLabel),
+                                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                                    modifier = Modifier.size(14.dp)
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                                Text(
+                                    text = section.dateLabel,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
                             Text(
                                 text = "${section.items.size}",
                                 style = MaterialTheme.typography.labelSmall,
@@ -157,9 +225,13 @@ fun PhotosScreen(
                         key = { it.id },
                         contentType = { "photo_tile" }
                     ) { photo ->
+                        val isSelected = photo.id in selectedIds
                         PhotoGridTile(
                             item = photo,
-                            onClick = { onPhotoClick(photo) }
+                            isSelectionMode = isSelectionMode,
+                            isSelected = isSelected,
+                            onPhotoClick = onPhotoClick,
+                            onToggleSelect = onToggleSelect
                         )
                     }
                 }
@@ -168,18 +240,22 @@ fun PhotosScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun PhotoGridTile(
     item: MediaItem,
-    onClick: () -> Unit
+    isSelectionMode: Boolean,
+    isSelected: Boolean,
+    onPhotoClick: (MediaItem) -> Unit,
+    onToggleSelect: (MediaItem) -> Unit
 ) {
     val context = LocalContext.current
+    val haptics = LocalHapticFeedback.current
     val imageRequest = remember(item.uri) {
         ImageRequest.Builder(context)
             .data(item.uri)
-            .size(360)
+            .size(256)
             .allowHardware(true)
-            .crossfade(true)
             .build()
     }
 
@@ -188,15 +264,65 @@ private fun PhotoGridTile(
             .aspectRatio(1f)
             .clip(RoundedCornerShape(6.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .clickable(onClick = onClick)
+            .then(
+                if (isSelected) {
+                    Modifier.border(2.5.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(6.dp))
+                } else {
+                    Modifier
+                }
+            )
+            .combinedClickable(
+                onClick = {
+                    if (isSelectionMode) onToggleSelect(item) else onPhotoClick(item)
+                },
+                onLongClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onToggleSelect(item)
+                }
+            )
             .testTag("photo_tile_${item.id}")
     ) {
         AsyncImage(
             model = imageRequest,
             contentDescription = item.displayName,
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    val s = if (isSelected) 0.90f else 1f
+                    scaleX = s
+                    scaleY = s
+                }
         )
+
+        if (isSelectionMode) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(6.dp)
+                    .size(22.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (isSelected) MaterialTheme.colorScheme.primary
+                        else Color.Black.copy(alpha = 0.45f)
+                    )
+                    .border(
+                        width = 1.5.dp,
+                        color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                if (isSelected) {
+                    Icon(
+                        imageVector = AppIcons.Check,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(14.dp)
+                    )
+                }
+            }
+        }
 
         val badge = when {
             item.isRawImage -> item.extension.uppercase(Locale.ROOT)

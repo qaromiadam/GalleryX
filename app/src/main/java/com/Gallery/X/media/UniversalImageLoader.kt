@@ -7,6 +7,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
+import android.util.Size
 import androidx.exifinterface.media.ExifInterface
 import coil.ImageLoader
 import coil.decode.DataSource
@@ -19,6 +20,7 @@ import coil.fetch.FetchResult
 import coil.fetch.Fetcher
 import coil.memory.MemoryCache
 import coil.request.Options
+import coil.size.Dimension
 import com.Gallery.X.data.MediaItem
 import java.util.Locale
 
@@ -49,8 +51,10 @@ object UniversalImageLoader {
                     .build()
             }
             .allowHardware(true)
-            .crossfade(120)
+            .crossfade(false)
             .components {
+                // Fast OS-cached micro-thumbnails on Android 10+ for large photo & video grids
+                add(MediaStoreThumbnailFetcher.Factory(context))
                 // API 28+ ImageDecoderDecoder handles animated GIF, animated WebP, HEIC/HEIF/AVIF
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     add(ImageDecoderDecoder.Factory())
@@ -64,6 +68,47 @@ object UniversalImageLoader {
                 add(VideoFallbackFrameFetcher.Factory(context))
             }
             .build()
+    }
+}
+
+/**
+ * Uses Android 10+ ContentResolver.loadThumbnail() for fast pre-cached grid thumbnails
+ * on MediaStore content URIs when a small bounded size is requested, avoiding full-res
+ * photo/4K-video frame decoding during fast scrolling through large libraries.
+ */
+class MediaStoreThumbnailFetcher(
+    private val context: Context,
+    private val uri: Uri,
+    private val targetWidth: Int,
+    private val targetHeight: Int
+) : Fetcher {
+
+    override suspend fun fetch(): FetchResult? {
+        val bitmap = runCatching {
+            context.contentResolver.loadThumbnail(uri, Size(targetWidth, targetHeight), null)
+        }.getOrNull() ?: return null
+
+        return DrawableResult(
+            drawable = BitmapDrawable(context.resources, bitmap),
+            isSampled = true,
+            dataSource = DataSource.DISK
+        )
+    }
+
+    class Factory(private val context: Context) : Fetcher.Factory<Uri> {
+        override fun create(data: Uri, options: Options, imageLoader: ImageLoader): Fetcher? {
+            if (data.scheme != "content" || data.authority != "media") return null
+            val w = (options.size.width as? Dimension.Pixels)?.px ?: return null
+            val h = (options.size.height as? Dimension.Pixels)?.px ?: return null
+            if (w <= 0 || h <= 0 || w > 400 || h > 400) return null
+
+            val ext = data.lastPathSegment.orEmpty().substringAfterLast('.', "").lowercase(Locale.ROOT)
+            if (ext == "gif") return null
+            val mime = context.contentResolver.getType(data).orEmpty().lowercase(Locale.ROOT)
+            if (mime == "image/gif") return null
+
+            return MediaStoreThumbnailFetcher(context, data, w, h)
+        }
     }
 }
 

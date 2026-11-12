@@ -69,6 +69,14 @@ data class PhotoDateSection(
 )
 
 @Immutable
+data class SelectionBreakdown(
+    val total: Int = 0,
+    val photos: Int = 0,
+    val videos: Int = 0,
+    val audio: Int = 0
+)
+
+@Immutable
 data class ExifDetails(
     val cameraMakeModel: String = "",
     val aperture: String = "",

@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -58,9 +59,11 @@ import com.Gallery.X.data.MediaType
 import com.Gallery.X.data.PermissionAccessLevel
 import com.Gallery.X.ui.AppTab
 import com.Gallery.X.ui.GalleryViewModel
+import com.Gallery.X.ui.components.DeleteMultipleConfirmDialog
 import com.Gallery.X.ui.components.FloatingSearchBar
 import com.Gallery.X.ui.components.PartialAccessBanner
 import com.Gallery.X.ui.components.PermissionGateCard
+import com.Gallery.X.ui.components.SelectionTopBar
 import com.Gallery.X.ui.editors.AudioEditorScreen
 import com.Gallery.X.ui.editors.PhotoEditorScreen
 import com.Gallery.X.ui.editors.VideoEditorScreen
@@ -135,10 +138,13 @@ private fun GalleryXRoot(viewModel: GalleryViewModel) {
     val audioPlayerState by viewModel.audioPlayerState.collectAsStateWithLifecycle()
     val exportState by viewModel.exportState.collectAsStateWithLifecycle()
     val externalOpenItem by viewModel.externalOpenItem.collectAsStateWithLifecycle()
+    val selectedIds by viewModel.selectedIds.collectAsStateWithLifecycle()
+    val selectionBreakdown by viewModel.selectionBreakdown.collectAsStateWithLifecycle()
 
     var currentTab by remember { mutableStateOf(AppTab.PHOTOS) }
     var overlay by remember { mutableStateOf<ActiveOverlay>(ActiveOverlay.None) }
     var isGridScrolled by remember { mutableStateOf(false) }
+    var showBatchDeleteConfirm by remember { mutableStateOf(false) }
 
     val requiredPermissions = remember { buildRequiredPermissions() }
 
@@ -154,6 +160,7 @@ private fun GalleryXRoot(viewModel: GalleryViewModel) {
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             Toast.makeText(context, context.getString(R.string.delete_success), Toast.LENGTH_SHORT).show()
+            viewModel.clearSelection()
             viewModel.refreshLibrary()
             overlay = ActiveOverlay.None
         } else {
@@ -376,7 +383,18 @@ private fun GalleryXRoot(viewModel: GalleryViewModel) {
                                     .padding(innerPadding)
                                     .statusBarsPadding()
                             ) {
-                                // Floating Google Photos-style Search Bar (hidden on Settings tab)
+                                val activeTabItems = when (currentTab) {
+                                    AppTab.PHOTOS -> filteredPhotos
+                                    AppTab.VIDEOS -> filteredVideos
+                                    AppTab.AUDIO -> filteredAudio
+                                    AppTab.SETTINGS -> emptyList()
+                                }
+                                val isSelectionMode = selectedIds.isNotEmpty() && currentTab != AppTab.SETTINGS
+                                BackHandler(enabled = isSelectionMode) {
+                                    viewModel.clearSelection()
+                                }
+
+                                // Floating Google Photos-style Search Bar or Multi-Select Top Bar (hidden on Settings tab)
                                 AnimatedVisibility(visible = currentTab != AppTab.SETTINGS) {
                                     val hintRes = when (currentTab) {
                                         AppTab.PHOTOS -> R.string.search_photos_hint
@@ -393,11 +411,24 @@ private fun GalleryXRoot(viewModel: GalleryViewModel) {
                                             ),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        FloatingSearchBar(
-                                            query = searchQuery,
-                                            onQueryChange = viewModel::setSearchQuery,
-                                            placeholder = stringResource(hintRes)
-                                        )
+                                        if (isSelectionMode) {
+                                            val allSelected = activeTabItems.isNotEmpty() &&
+                                                activeTabItems.all { it.id in selectedIds }
+                                            SelectionTopBar(
+                                                breakdown = selectionBreakdown,
+                                                allSelected = allSelected,
+                                                onClearSelection = viewModel::clearSelection,
+                                                onToggleSelectAll = { viewModel.toggleSelectAll(activeTabItems) },
+                                                onShareSelected = viewModel::shareSelectedItems,
+                                                onDeleteSelected = { showBatchDeleteConfirm = true }
+                                            )
+                                        } else {
+                                            FloatingSearchBar(
+                                                query = searchQuery,
+                                                onQueryChange = viewModel::setSearchQuery,
+                                                placeholder = stringResource(hintRes)
+                                            )
+                                        }
                                     }
                                 }
 
@@ -435,7 +466,10 @@ private fun GalleryXRoot(viewModel: GalleryViewModel) {
                                             gridColumns = settings.gridColumns,
                                             onSelectFolder = viewModel::selectPhotoFolder,
                                             onPhotoClick = { overlay = ActiveOverlay.PhotoViewer(it) },
-                                            onScrollStateChanged = { isGridScrolled = it }
+                                            onScrollStateChanged = { isGridScrolled = it },
+                                            selectedIds = selectedIds,
+                                            onToggleSelect = { viewModel.toggleSelection(it.id) },
+                                            onToggleDateSection = viewModel::toggleSelectAll
                                         )
                                         AppTab.VIDEOS -> VideosScreen(
                                             videos = filteredVideos,
@@ -444,7 +478,9 @@ private fun GalleryXRoot(viewModel: GalleryViewModel) {
                                             gridColumns = settings.gridColumns,
                                             onSelectFolder = viewModel::selectVideoFolder,
                                             onVideoClick = { overlay = ActiveOverlay.VideoPlayer(it) },
-                                            onScrollStateChanged = { isGridScrolled = it }
+                                            onScrollStateChanged = { isGridScrolled = it },
+                                            selectedIds = selectedIds,
+                                            onToggleSelect = { viewModel.toggleSelection(it.id) }
                                         )
                                         AppTab.AUDIO -> AudioScreen(
                                             audioItems = filteredAudio,
@@ -454,7 +490,9 @@ private fun GalleryXRoot(viewModel: GalleryViewModel) {
                                             onSelectFolder = viewModel::selectAudioFolder,
                                             onPlayOrToggle = viewModel::playOrToggleAudio,
                                             onEditAudio = { overlay = ActiveOverlay.AudioEditor(it) },
-                                            onScrollStateChanged = { isGridScrolled = it }
+                                            onScrollStateChanged = { isGridScrolled = it },
+                                            selectedIds = selectedIds,
+                                            onToggleSelect = { viewModel.toggleSelection(it.id) }
                                         )
                                         AppTab.SETTINGS -> SettingsScreen(
                                             settings = settings,
@@ -467,6 +505,28 @@ private fun GalleryXRoot(viewModel: GalleryViewModel) {
                                             onSetLanguageTag = viewModel::setLanguageTag
                                         )
                                     }
+                                }
+
+                                if (showBatchDeleteConfirm) {
+                                    DeleteMultipleConfirmDialog(
+                                        count = selectedIds.size,
+                                        onConfirm = {
+                                            showBatchDeleteConfirm = false
+                                            viewModel.deleteAllSelectedItems(
+                                                onNeedConfirmation = { sender ->
+                                                    deleteLauncher.launch(IntentSenderRequest.Builder(sender).build())
+                                                },
+                                                onCompleted = { ok ->
+                                                    Toast.makeText(
+                                                        context,
+                                                        context.getString(if (ok) R.string.delete_success else R.string.delete_failed),
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                }
+                                            )
+                                        },
+                                        onDismiss = { showBatchDeleteConfirm = false }
+                                    )
                                 }
                             }
                         }

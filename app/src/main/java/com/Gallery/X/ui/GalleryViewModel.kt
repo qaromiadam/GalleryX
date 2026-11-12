@@ -23,6 +23,7 @@ import com.Gallery.X.data.MediaRepository
 import com.Gallery.X.data.MediaType
 import com.Gallery.X.data.PermissionAccessLevel
 import com.Gallery.X.data.PhotoDateSection
+import com.Gallery.X.data.SelectionBreakdown
 import com.Gallery.X.data.SettingsDataStore
 import com.Gallery.X.data.VideoTargetFormat
 import com.Gallery.X.media.MediaTranscodeEngine
@@ -39,6 +40,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
@@ -94,6 +96,9 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
 
     private val _externalOpenItem = MutableStateFlow<MediaItem?>(null)
     val externalOpenItem: StateFlow<MediaItem?> = _externalOpenItem.asStateFlow()
+
+    private val _selectedIds = MutableStateFlow<Set<Long>>(emptySet())
+    val selectedIds: StateFlow<Set<Long>> = _selectedIds.asStateFlow()
 
     private val _audioPlayerState = MutableStateFlow(AudioPlayerUiState())
     val audioPlayerState: StateFlow<AudioPlayerUiState> = _audioPlayerState.asStateFlow()
@@ -152,12 +157,38 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val photoDateSections: StateFlow<List<PhotoDateSection>> = filteredPhotos
-        .combine(_selectedPhotoFolder) { photos, _ ->
+        .map { photos ->
             photos.groupBy { it.dateGroupLabel }
                 .map { (date, list) -> PhotoDateSection(date, list) }
         }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val selectionBreakdown: StateFlow<SelectionBreakdown> = combine(_allMedia, _selectedIds) { all, ids ->
+        if (ids.isEmpty()) {
+            SelectionBreakdown()
+        } else {
+            var photos = 0
+            var videos = 0
+            var audio = 0
+            for (item in all) {
+                if (item.id in ids) {
+                    when (item.mediaType) {
+                        MediaType.PHOTO -> photos++
+                        MediaType.VIDEO -> videos++
+                        MediaType.AUDIO -> audio++
+                    }
+                }
+            }
+            SelectionBreakdown(
+                total = photos + videos + audio,
+                photos = photos,
+                videos = videos,
+                audio = audio
+            )
+        }
+    }.flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SelectionBreakdown())
 
     val filteredVideos: StateFlow<List<MediaItem>> = combine(
         _allMedia,
@@ -210,7 +241,9 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
     fun refreshLibrary() {
         viewModelScope.launch {
             _isScanning.value = true
-            _allMedia.value = repository.queryAllMedia()
+            val list = repository.queryAllMedia()
+            _allMedia.value = list
+            pruneSelection(list)
             _isScanning.value = false
         }
     }
@@ -221,8 +254,19 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
             _isScanning.value = true
             repository.observeMediaLibrary().collect { list ->
                 _allMedia.value = list
+                pruneSelection(list)
                 _isScanning.value = false
             }
+        }
+    }
+
+    private fun pruneSelection(list: List<MediaItem>) {
+        val currentIds = _selectedIds.value
+        if (currentIds.isEmpty()) return
+        val existingIds = list.asSequence().map { it.id }.toSet()
+        val retained = currentIds.intersect(existingIds)
+        if (retained.size != currentIds.size) {
+            _selectedIds.value = retained
         }
     }
 
@@ -261,6 +305,38 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
         repository.shareMediaItem(item)
     }
 
+    fun shareItems(items: List<MediaItem>) {
+        repository.shareMediaItems(items)
+    }
+
+    fun shareSelectedItems() {
+        val ids = _selectedIds.value
+        if (ids.isEmpty()) return
+        val targets = _allMedia.value.filter { it.id in ids }
+        repository.shareMediaItems(targets)
+    }
+
+    fun toggleSelection(itemId: Long) {
+        _selectedIds.update { current ->
+            if (itemId in current) current - itemId else current + itemId
+        }
+    }
+
+    fun toggleSelectAll(items: List<MediaItem>) {
+        if (items.isEmpty()) return
+        val tabIds = HashSet<Long>(items.size)
+        for (item in items) {
+            tabIds.add(item.id)
+        }
+        _selectedIds.update { current ->
+            if (current.containsAll(tabIds)) current - tabIds else current + tabIds
+        }
+    }
+
+    fun clearSelection() {
+        _selectedIds.value = emptySet()
+    }
+
     fun deleteItem(
         item: MediaItem,
         onNeedConfirmation: (IntentSender) -> Unit,
@@ -280,6 +356,39 @@ class GalleryViewModel(application: Application) : AndroidViewModel(application)
                 }
             }
         }
+    }
+
+    fun deleteSelectedItems(
+        items: List<MediaItem>,
+        onNeedConfirmation: (IntentSender) -> Unit,
+        onCompleted: (Boolean) -> Unit
+    ) {
+        if (items.isEmpty()) return
+        viewModelScope.launch {
+            when (val res = repository.requestDeleteMultiple(items)) {
+                MediaRepository.DeleteResult.Deleted -> {
+                    clearSelection()
+                    refreshLibrary()
+                    onCompleted(true)
+                }
+                is MediaRepository.DeleteResult.RequiresConfirmation -> {
+                    onNeedConfirmation(res.intentSender)
+                }
+                MediaRepository.DeleteResult.Failed -> {
+                    onCompleted(false)
+                }
+            }
+        }
+    }
+
+    fun deleteAllSelectedItems(
+        onNeedConfirmation: (IntentSender) -> Unit,
+        onCompleted: (Boolean) -> Unit
+    ) {
+        val ids = _selectedIds.value
+        if (ids.isEmpty()) return
+        val targets = _allMedia.value.filter { it.id in ids }
+        deleteSelectedItems(targets, onNeedConfirmation, onCompleted)
     }
 
     // --- Audio Playback Engine (Persistent Mini-Player + Audio Tab) ---

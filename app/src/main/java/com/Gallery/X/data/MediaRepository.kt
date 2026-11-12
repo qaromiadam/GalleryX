@@ -1,6 +1,7 @@
 package com.Gallery.X.data
 
 import android.app.RecoverableSecurityException
+import android.content.ClipData
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
@@ -260,8 +261,6 @@ class MediaRepository(private val context: Context) {
                     val ext = name.substringAfterLast('.', "").lowercase(Locale.ROOT)
                     val uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id)
 
-                    val resolvedDuration = if (duration > 0L) duration else safeExtractDurationMs(uri)
-
                     out.add(
                         MediaItem(
                             id = id,
@@ -274,7 +273,7 @@ class MediaRepository(private val context: Context) {
                             dateAddedSec = added,
                             dateModifiedSec = modified,
                             dateGroupLabel = formatDateGroup(dateFormat, modified),
-                            durationMs = resolvedDuration,
+                            durationMs = duration,
                             artist = artist,
                             album = album,
                             mediaType = MediaType.AUDIO
@@ -350,7 +349,7 @@ class MediaRepository(private val context: Context) {
                             dateAddedSec = added,
                             dateModifiedSec = modified,
                             dateGroupLabel = formatDateGroup(dateFormat, modified),
-                            durationMs = if (detectedType != MediaType.PHOTO) safeExtractDurationMs(uri) else 0L,
+                            durationMs = 0L,
                             mediaType = detectedType
                         )
                     )
@@ -460,31 +459,43 @@ class MediaRepository(private val context: Context) {
      * Android 10 (RecoverableSecurityException) or Android 11+ (createDeleteRequest)
      * requires explicit system user confirmation.
      */
-    suspend fun requestDelete(item: MediaItem): DeleteResult = withContext(Dispatchers.IO) {
+    suspend fun requestDelete(item: MediaItem): DeleteResult =
+        requestDeleteMultiple(listOf(item))
+
+    suspend fun requestDeleteMultiple(items: List<MediaItem>): DeleteResult = withContext(Dispatchers.IO) {
+        if (items.isEmpty()) return@withContext DeleteResult.Failed
+        val uris = items.map { it.uri }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             return@withContext runCatching {
-                val pendingIntent = MediaStore.createDeleteRequest(resolver, listOf(item.uri))
+                val pendingIntent = MediaStore.createDeleteRequest(resolver, uris)
                 DeleteResult.RequiresConfirmation(pendingIntent.intentSender)
             }.getOrElse {
-                runCatching {
-                    val rows = resolver.delete(item.uri, null, null)
-                    if (rows > 0) DeleteResult.Deleted else DeleteResult.Failed
-                }.getOrDefault(DeleteResult.Failed)
+                var deletedCount = 0
+                for (uri in uris) {
+                    val rows = runCatching { resolver.delete(uri, null, null) }.getOrDefault(0)
+                    if (rows > 0) deletedCount++
+                }
+                if (deletedCount > 0) DeleteResult.Deleted else DeleteResult.Failed
             }
         } else {
-            return@withContext try {
-                val rows = resolver.delete(item.uri, null, null)
-                if (rows > 0) DeleteResult.Deleted else DeleteResult.Failed
-            } catch (sec: SecurityException) {
-                val recoverable = sec as? RecoverableSecurityException
-                if (recoverable != null) {
-                    DeleteResult.RequiresConfirmation(recoverable.userAction.actionIntent.intentSender)
-                } else {
-                    DeleteResult.Failed
+            var deletedCount = 0
+            for (uri in uris) {
+                try {
+                    val rows = resolver.delete(uri, null, null)
+                    if (rows > 0) deletedCount++
+                } catch (sec: SecurityException) {
+                    val recoverable = sec as? RecoverableSecurityException
+                    if (recoverable != null) {
+                        return@withContext DeleteResult.RequiresConfirmation(
+                            recoverable.userAction.actionIntent.intentSender
+                        )
+                    }
+                } catch (_: Exception) {
+                    // Continue attempting remaining items
                 }
-            } catch (_: Exception) {
-                DeleteResult.Failed
             }
+            return@withContext if (deletedCount > 0) DeleteResult.Deleted else DeleteResult.Failed
         }
     }
 
@@ -495,6 +506,40 @@ class MediaRepository(private val context: Context) {
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         val chooser = Intent.createChooser(shareIntent, item.displayName).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(chooser)
+    }
+
+    fun shareMediaItems(items: List<MediaItem>) {
+        if (items.isEmpty()) return
+        if (items.size == 1) {
+            shareMediaItem(items.first())
+            return
+        }
+        val uris = ArrayList(items.map { it.uri })
+        val types = items.map { it.mediaType }.distinct()
+        val mimeType = if (types.size == 1) {
+            when (types.first()) {
+                MediaType.PHOTO -> "image/*"
+                MediaType.VIDEO -> "video/*"
+                MediaType.AUDIO -> "audio/*"
+            }
+        } else {
+            "*/*"
+        }
+        val shareClipData = ClipData.newUri(resolver, "media", uris.first()).apply {
+            for (i in 1 until uris.size) {
+                addItem(ClipData.Item(uris[i]))
+            }
+        }
+        val shareIntent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+            type = mimeType
+            putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
+            clipData = shareClipData
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        val chooser = Intent.createChooser(shareIntent, null).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         context.startActivity(chooser)
