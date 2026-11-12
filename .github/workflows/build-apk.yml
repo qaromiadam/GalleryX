@@ -70,12 +70,15 @@ jobs:
 
       - name: Upload APK build artifact
         uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
           name: GalleryX-APK
           path: release-apks/*.apk
+          retention-days: 1
+          if-no-files-found: warn
 
       - name: Publish GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.release_tag != '')
+        if: always() && (startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.release_tag != ''))
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || inputs.release_tag }}
