@@ -1,0 +1,90 @@
+name: Build and Release GalleryX APK
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Optional tag name to publish a GitHub Release (e.g. v1.0.0)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    name: Build GalleryX APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.3.1"
+
+      - name: Restore debug keystore
+        run: |
+          if [ ! -f debug.keystore ] && [ -f debug.keystore.base64 ]; then
+            base64 -d debug.keystore.base64 > debug.keystore
+          fi
+
+      - name: Run unit tests
+        run: gradle :app:testDebugUnitTest
+
+      - name: Build Debug APK
+        run: gradle :app:assembleDebug
+
+      - name: Build Signed Release APK (if secrets configured)
+        id: release_build
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ] && [ -n "$STORE_PASSWORD" ] && [ -n "$KEY_PASSWORD" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > my-upload-key.jks
+            gradle :app:assembleRelease
+            echo "has_release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Release signing secrets not set; skipping release APK."
+            echo "has_release=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Stage APK files
+        run: |
+          mkdir -p release-apks
+          cp app/build/outputs/apk/debug/app-debug.apk release-apks/GalleryX-debug.apk
+          if [ "${{ steps.release_build.outputs.has_release }}" = "true" ] && [ -f app/build/outputs/apk/release/app-release.apk ]; then
+            cp app/build/outputs/apk/release/app-release.apk release-apks/GalleryX-release.apk
+          fi
+          ls -lh release-apks/
+
+      - name: Upload APK build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GalleryX-APK
+          path: release-apks/*.apk
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.release_tag != '')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || inputs.release_tag }}
+          name: GalleryX ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || inputs.release_tag }}
+          files: release-apks/*.apk
+          generate_release_notes: true
