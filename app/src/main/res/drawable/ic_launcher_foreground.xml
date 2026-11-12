@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Bold geometric GX monogram strictly inside the inner 66dp x 66dp center safe zone (21..87) -->
+    <!-- Geometric G -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M50.5,38.5 L45.5,43.5 C43.5,40.8 41.0,39.5 38.0,39.5 C33.0,39.5 30.0,44.5 30.0,54.0 C30.0,63.5 33.0,68.5 38.5,68.5 C42.5,68.5 45.0,66.0 45.5,61.5 L38.5,61.5 L38.5,54.5 L52.5,54.5 L52.5,62.0 C52.5,71.0 46.5,76.0 38.5,76.0 C28.5,76.0 23.0,67.5 23.0,54.0 C23.0,40.5 29.0,32.0 38.5,32.0 C44.0,32.0 48.0,34.5 50.5,38.5 Z" />
+    <!-- Geometric X primary diagonal -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M57.0,32.0 L65.5,32.0 L85.0,76.0 L76.5,76.0 Z" />
+    <!-- Geometric X accent diagonal -->
+    <path
+        android:fillColor="#FF38BDF8"
+        android:pathData="M76.5,32.0 L85.0,32.0 L65.5,76.0 L57.0,76.0 Z" />
+</vector>

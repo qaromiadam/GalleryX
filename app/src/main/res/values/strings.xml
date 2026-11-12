@@ -1,0 +1,153 @@
+<resources>
+    <string name="app_name">GalleryX</string>
+
+    <!-- Navigation -->
+    <string name="nav_photos">Photos</string>
+    <string name="nav_videos">Videos</string>
+    <string name="nav_audio">Audio</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Search & Filters -->
+    <string name="search_photos_hint">Search photos, folders, or dates</string>
+    <string name="search_videos_hint">Search videos, folders, or dates</string>
+    <string name="search_audio_hint">Search audio, artists, or folders</string>
+    <string name="cd_search">Search media</string>
+    <string name="cd_clear_search">Clear search</string>
+    <string name="filter_all_folders">All</string>
+
+    <!-- Permissions & Empty States -->
+    <string name="perm_title">Offline Local Media Access</string>
+    <string name="perm_subtitle">GalleryX runs 100% offline with zero network permissions. Grant access to browse, play, edit, and convert your photos, videos, and audio files.</string>
+    <string name="perm_grant_button">Grant Media Access</string>
+    <string name="perm_partial_banner">Limited photo and video access selected. Add more items or allow full library access.</string>
+    <string name="perm_partial_manage">Manage Access</string>
+    <string name="perm_open_settings">App Settings</string>
+    <string name="empty_photos_title">No photos found</string>
+    <string name="empty_photos_subtitle">Take a photo or adjust your search and folder filters.</string>
+    <string name="empty_videos_title">No videos found</string>
+    <string name="empty_videos_subtitle">No matching video files were found on this device.</string>
+    <string name="empty_audio_title">No audio files found</string>
+    <string name="empty_audio_subtitle">Music, voice recordings, and sound notes will appear here.</string>
+    <string name="loading_media">Scanning local media library...</string>
+
+    <!-- Photo Viewer & Metadata -->
+    <string name="cd_back">Navigate back</string>
+    <string name="cd_share">Share media</string>
+    <string name="cd_delete">Delete media</string>
+    <string name="cd_edit">Edit media</string>
+    <string name="cd_info">Media details</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_share">Share</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_info">Info</string>
+    <string name="action_save">Save Copy</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_reset">Reset</string>
+    <string name="action_apply">Apply</string>
+    <string name="action_done">Done</string>
+    <string name="delete_confirm_title">Delete File</string>
+    <string name="delete_confirm_message">Are you sure you want to permanently delete this file from device storage?</string>
+    <string name="delete_success">File deleted</string>
+    <string name="delete_failed">Could not delete file</string>
+    <string name="info_sheet_title">Media Information</string>
+    <string name="info_filename">File Name</string>
+    <string name="info_folder">Folder</string>
+    <string name="info_format">Format / MIME</string>
+    <string name="info_dimensions">Dimensions</string>
+    <string name="info_size">File Size</string>
+    <string name="info_date">Date Modified</string>
+    <string name="info_camera">Camera / Device</string>
+    <string name="info_exposure">Exposure / ISO</string>
+    <string name="info_focal">Focal / Aperture</string>
+    <string name="info_duration">Duration</string>
+    <string name="info_unknown">Unavailable</string>
+
+    <!-- Video & Audio Playback -->
+    <string name="cd_play">Play</string>
+    <string name="cd_pause">Pause</string>
+    <string name="cd_mute">Mute</string>
+    <string name="cd_unmute">Unmute</string>
+    <string name="cd_loop">Toggle loop</string>
+    <string name="cd_waveform">Audio waveform</string>
+    <string name="playback_loop_on">Loop On</string>
+    <string name="playback_loop_off">Loop Off</string>
+    <string name="playback_error">Unable to decode this stream on device</string>
+
+    <!-- Photo Editor -->
+    <string name="photo_editor_title">Photo Studio</string>
+    <string name="editor_tool_crop">Crop</string>
+    <string name="editor_tool_rotate">Rotate 90</string>
+    <string name="editor_tool_flip_h">Flip H</string>
+    <string name="editor_tool_flip_v">Flip V</string>
+    <string name="editor_tool_filters">Filters</string>
+    <string name="editor_tool_adjust">Adjust</string>
+    <string name="editor_tool_convert">Convert</string>
+    <string name="adjust_brightness">Brightness</string>
+    <string name="adjust_contrast">Contrast</string>
+    <string name="filter_original">Original</string>
+    <string name="filter_mono">Mono</string>
+    <string name="filter_warm">Warm</string>
+    <string name="filter_cool">Cool</string>
+    <string name="filter_vivid">Vivid</string>
+    <string name="filter_sepia">Sepia</string>
+    <string name="convert_target_format">Target Output Format</string>
+    <string name="convert_quality">Compression Quality</string>
+    <string name="export_saving">Saving copy to device...</string>
+    <string name="export_saved_photo">Saved copy to Pictures/GalleryX</string>
+    <string name="export_failed">Export failed</string>
+
+    <!-- Video Editor & Transcoder -->
+    <string name="video_editor_title">Video Studio</string>
+    <string name="video_trim_range">Trim Range</string>
+    <string name="video_aspect_preset">Aspect Crop</string>
+    <string name="aspect_free">Original</string>
+    <string name="aspect_square">1:1</string>
+    <string name="aspect_landscape">16:9</string>
+    <string name="aspect_portrait">9:16</string>
+    <string name="aspect_classic">4:3</string>
+    <string name="video_mode_transcode">Video Export</string>
+    <string name="video_mode_extract_audio">Extract Audio</string>
+    <string name="export_saved_video">Saved video copy to Movies/GalleryX</string>
+    <string name="export_saved_audio">Saved audio copy to Music/GalleryX</string>
+    <string name="export_progress">Processing %1$d%%</string>
+
+    <!-- Audio Editor & Converter -->
+    <string name="audio_editor_title">Audio Studio</string>
+    <string name="audio_fade_in">Fade In (1.5s)</string>
+    <string name="audio_fade_out">Fade Out (1.5s)</string>
+    <string name="audio_trim_start">Start</string>
+    <string name="audio_trim_end">End</string>
+
+    <!-- Capability Badges -->
+    <string name="cap_native_hw">Native Codec</string>
+    <string name="cap_kotlin_enc">Pure-Kotlin Encoder</string>
+    <string name="cap_smart_fallback">Smart Fallback (%1$s)</string>
+
+    <!-- Settings & Personalization -->
+    <string name="settings_title">Customization</string>
+    <string name="settings_preview_title">Live Theme Preview</string>
+    <string name="settings_preview_subtitle">Previewing background, text, accent, and %1$d-column density</string>
+    <string name="settings_preview_chip">Sample Tag</string>
+    <string name="settings_theme_section">Theme &amp; Colors</string>
+    <string name="settings_use_custom_theme">Custom Color Palette</string>
+    <string name="settings_use_custom_desc">Override system light or dark colors</string>
+    <string name="settings_bg_color">App Background Color</string>
+    <string name="settings_text_color">Primary Text Color</string>
+    <string name="settings_accent_color">Accent / Highlight Color</string>
+    <string name="settings_reset_colors">Reset Default Colors</string>
+    <string name="settings_layout_section">Grid Layout</string>
+    <string name="settings_grid_columns">Grid Column Count</string>
+    <string name="settings_columns_n">%1$d Columns</string>
+    <string name="settings_language_section">Language</string>
+    <string name="lang_system">System Default</string>
+    <string name="lang_en">English</string>
+    <string name="lang_fr">French (Francais)</string>
+    <string name="lang_ar">Arabic (Al-Arabiyyah)</string>
+    <string name="settings_privacy_section">Offline Architecture</string>
+    <string name="settings_privacy_body">Zero internet permissions, zero analytics, zero cloud sync. All media decoding, editing, and transcoding execute locally on this device.</string>
+    <string name="color_picker_title">Pick Color</string>
+    <string name="color_hex_label">Hex Code (#RRGGBB)</string>
+    <string name="color_red">Red</string>
+    <string name="color_green">Green</string>
+    <string name="color_blue">Blue</string>
+</resources>

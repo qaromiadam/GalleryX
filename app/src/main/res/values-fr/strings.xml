@@ -1,0 +1,153 @@
+<resources>
+    <string name="app_name">GalleryX</string>
+
+    <!-- Navigation -->
+    <string name="nav_photos">Photos</string>
+    <string name="nav_videos">Videos</string>
+    <string name="nav_audio">Audio</string>
+    <string name="nav_settings">Parametres</string>
+
+    <!-- Search & Filters -->
+    <string name="search_photos_hint">Rechercher photos, dossiers ou dates</string>
+    <string name="search_videos_hint">Rechercher videos, dossiers ou dates</string>
+    <string name="search_audio_hint">Rechercher audio, artistes ou dossiers</string>
+    <string name="cd_search">Rechercher des medias</string>
+    <string name="cd_clear_search">Effacer la recherche</string>
+    <string name="filter_all_folders">Tout</string>
+
+    <!-- Permissions & Empty States -->
+    <string name="perm_title">Acces local hors ligne</string>
+    <string name="perm_subtitle">GalleryX fonctionne 100%% hors ligne sans aucune permission reseau. Autorisez l\'acces pour parcourir, lire, editer et convertir vos fichiers.</string>
+    <string name="perm_grant_button">Autoriser l\'acces aux medias</string>
+    <string name="perm_partial_banner">Acces limite selectionne. Ajoutez d\'autres elements ou autorisez toute la bibliotheque.</string>
+    <string name="perm_partial_manage">Gerer l\'acces</string>
+    <string name="perm_open_settings">Parametres de l\'app</string>
+    <string name="empty_photos_title">Aucune photo trouvee</string>
+    <string name="empty_photos_subtitle">Prenez une photo ou ajustez votre recherche et vos filtres de dossier.</string>
+    <string name="empty_videos_title">Aucune video trouvee</string>
+    <string name="empty_videos_subtitle">Aucun fichier video correspondant n\'a ete trouve sur cet appareil.</string>
+    <string name="empty_audio_title">Aucun fichier audio trouve</string>
+    <string name="empty_audio_subtitle">Musiques, enregistrements vocaux et notes sonores apparaitront ici.</string>
+    <string name="loading_media">Analyse de la bibliotheque locale...</string>
+
+    <!-- Photo Viewer & Metadata -->
+    <string name="cd_back">Retour</string>
+    <string name="cd_share">Partager</string>
+    <string name="cd_delete">Supprimer</string>
+    <string name="cd_edit">Editer</string>
+    <string name="cd_info">Informations</string>
+    <string name="action_edit">Editer</string>
+    <string name="action_share">Partager</string>
+    <string name="action_delete">Supprimer</string>
+    <string name="action_info">Infos</string>
+    <string name="action_save">Enregistrer une copie</string>
+    <string name="action_cancel">Annuler</string>
+    <string name="action_reset">Reinitialiser</string>
+    <string name="action_apply">Appliquer</string>
+    <string name="action_done">Termine</string>
+    <string name="delete_confirm_title">Supprimer le fichier</string>
+    <string name="delete_confirm_message">Voulez-vous vraiment supprimer definitivement ce fichier du stockage ?</string>
+    <string name="delete_success">Fichier supprime</string>
+    <string name="delete_failed">Impossible de supprimer le fichier</string>
+    <string name="info_sheet_title">Informations du media</string>
+    <string name="info_filename">Nom du fichier</string>
+    <string name="info_folder">Dossier</string>
+    <string name="info_format">Format / MIME</string>
+    <string name="info_dimensions">Dimensions</string>
+    <string name="info_size">Taille</string>
+    <string name="info_date">Date de modification</string>
+    <string name="info_camera">Appareil photo</string>
+    <string name="info_exposure">Exposition / ISO</string>
+    <string name="info_focal">Focale / Ouverture</string>
+    <string name="info_duration">Duree</string>
+    <string name="info_unknown">Indisponible</string>
+
+    <!-- Video & Audio Playback -->
+    <string name="cd_play">Lecture</string>
+    <string name="cd_pause">Pause</string>
+    <string name="cd_mute">Couper le son</string>
+    <string name="cd_unmute">Activer le son</string>
+    <string name="cd_loop">Lecture en boucle</string>
+    <string name="cd_waveform">Forme d\'onde audio</string>
+    <string name="playback_loop_on">Boucle activee</string>
+    <string name="playback_loop_off">Boucle desactivee</string>
+    <string name="playback_error">Impossible de decoder ce flux sur l\'appareil</string>
+
+    <!-- Photo Editor -->
+    <string name="photo_editor_title">Studio Photo</string>
+    <string name="editor_tool_crop">Rogner</string>
+    <string name="editor_tool_rotate">Pivoter 90</string>
+    <string name="editor_tool_flip_h">Miroir H</string>
+    <string name="editor_tool_flip_v">Miroir V</string>
+    <string name="editor_tool_filters">Filtres</string>
+    <string name="editor_tool_adjust">Reglages</string>
+    <string name="editor_tool_convert">Convertir</string>
+    <string name="adjust_brightness">Luminosite</string>
+    <string name="adjust_contrast">Contraste</string>
+    <string name="filter_original">Original</string>
+    <string name="filter_mono">Mono</string>
+    <string name="filter_warm">Chaud</string>
+    <string name="filter_cool">Froid</string>
+    <string name="filter_vivid">Vif</string>
+    <string name="filter_sepia">Sepia</string>
+    <string name="convert_target_format">Format de sortie cible</string>
+    <string name="convert_quality">Qualite de compression</string>
+    <string name="export_saving">Enregistrement de la copie...</string>
+    <string name="export_saved_photo">Copie enregistree dans Pictures/GalleryX</string>
+    <string name="export_failed">Echec de l\'exportation</string>
+
+    <!-- Video Editor & Transcoder -->
+    <string name="video_editor_title">Studio Video</string>
+    <string name="video_trim_range">Plage de coupe</string>
+    <string name="video_aspect_preset">Recadrage ratio</string>
+    <string name="aspect_free">Original</string>
+    <string name="aspect_square">1:1</string>
+    <string name="aspect_landscape">16:9</string>
+    <string name="aspect_portrait">9:16</string>
+    <string name="aspect_classic">4:3</string>
+    <string name="video_mode_transcode">Exporter Video</string>
+    <string name="video_mode_extract_audio">Extraire Audio</string>
+    <string name="export_saved_video">Copie video enregistree dans Movies/GalleryX</string>
+    <string name="export_saved_audio">Copie audio enregistree dans Music/GalleryX</string>
+    <string name="export_progress">Traitement %1$d%%</string>
+
+    <!-- Audio Editor & Converter -->
+    <string name="audio_editor_title">Studio Audio</string>
+    <string name="audio_fade_in">Fondu entree (1.5s)</string>
+    <string name="audio_fade_out">Fondu sortie (1.5s)</string>
+    <string name="audio_trim_start">Debut</string>
+    <string name="audio_trim_end">Fin</string>
+
+    <!-- Capability Badges -->
+    <string name="cap_native_hw">Codec natif</string>
+    <string name="cap_kotlin_enc">Encodeur Kotlin</string>
+    <string name="cap_smart_fallback">Repli intelligent (%1$s)</string>
+
+    <!-- Settings & Personalization -->
+    <string name="settings_title">Personnalisation</string>
+    <string name="settings_preview_title">Apercu du theme</string>
+    <string name="settings_preview_subtitle">Apercu du fond, texte, accent et grille %1$d colonnes</string>
+    <string name="settings_preview_chip">Etiquette</string>
+    <string name="settings_theme_section">Theme et couleurs</string>
+    <string name="settings_use_custom_theme">Palette personnalisee</string>
+    <string name="settings_use_custom_desc">Remplacer les couleurs claires/sombres du systeme</string>
+    <string name="settings_bg_color">Couleur d\'arriere-plan</string>
+    <string name="settings_text_color">Couleur du texte principal</string>
+    <string name="settings_accent_color">Couleur d\'accentuation</string>
+    <string name="settings_reset_colors">Reinitialiser les couleurs</string>
+    <string name="settings_layout_section">Disposition de la grille</string>
+    <string name="settings_grid_columns">Nombre de colonnes</string>
+    <string name="settings_columns_n">%1$d colonnes</string>
+    <string name="settings_language_section">Langue</string>
+    <string name="lang_system">Langue du systeme</string>
+    <string name="lang_en">Anglais (English)</string>
+    <string name="lang_fr">Francais</string>
+    <string name="lang_ar">Arabe (Al-Arabiyyah)</string>
+    <string name="settings_privacy_section">Architecture hors ligne</string>
+    <string name="settings_privacy_body">Zero permission reseau, zero analyse, zero synchronisation cloud. Tout le decodage, l\'edition et le transcodage s\'executent localement.</string>
+    <string name="color_picker_title">Choisir une couleur</string>
+    <string name="color_hex_label">Code Hex (#RRGGBB)</string>
+    <string name="color_red">Rouge</string>
+    <string name="color_green">Vert</string>
+    <string name="color_blue">Bleu</string>
+</resources>

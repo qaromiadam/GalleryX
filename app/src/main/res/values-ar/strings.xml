@@ -1,0 +1,153 @@
+<resources>
+    <string name="app_name">GalleryX</string>
+
+    <!-- Navigation -->
+    <string name="nav_photos">الصور</string>
+    <string name="nav_videos">الفيديو</string>
+    <string name="nav_audio">الصوتيات</string>
+    <string name="nav_settings">الإعدادات</string>
+
+    <!-- Search & Filters -->
+    <string name="search_photos_hint">ابحث عن الصور أو المجلدات أو التواريخ</string>
+    <string name="search_videos_hint">ابحث عن الفيديو أو المجلدات أو التواريخ</string>
+    <string name="search_audio_hint">ابحث عن الصوتيات أو الفنانين أو المجلدات</string>
+    <string name="cd_search">بحث في الوسائط</string>
+    <string name="cd_clear_search">مسح البحث</string>
+    <string name="filter_all_folders">الكل</string>
+
+    <!-- Permissions & Empty States -->
+    <string name="perm_title">وصول محلي بدون إنترنت</string>
+    <string name="perm_subtitle">يعمل GalleryX بالكامل بدون اتصال بالإنترنت وبلا أي أذونات شبكة. امنح الإذن لتصفح الصور والفيديو والصوتيات وتشغيلها وتعديلها وتحويل صيغها.</string>
+    <string name="perm_grant_button">منح إذن الوصول للوسائط</string>
+    <string name="perm_partial_banner">تم تحديد وصول محدود للصور والفيديو. أضف عناصر أخرى أو اسمح بالوصول الكامل.</string>
+    <string name="perm_partial_manage">إدارة الوصول</string>
+    <string name="perm_open_settings">إعدادات التطبيق</string>
+    <string name="empty_photos_title">لم يتم العثور على صور</string>
+    <string name="empty_photos_subtitle">التقط صورة أو عدل خيارات البحث وتصفية المجلدات.</string>
+    <string name="empty_videos_title">لم يتم العثور على مقاطع فيديو</string>
+    <string name="empty_videos_subtitle">لا توجد ملفات فيديو مطابقة على هذا الجهاز.</string>
+    <string name="empty_audio_title">لم يتم العثور على ملفات صوتية</string>
+    <string name="empty_audio_subtitle">ستظهر هنا المقاطع الموسيقية والتسجيلات الصوتية والملاحظات.</string>
+    <string name="loading_media">جار فحص مكتبة الوسائط المحلية...</string>
+
+    <!-- Photo Viewer & Metadata -->
+    <string name="cd_back">رجوع</string>
+    <string name="cd_share">مشاركة</string>
+    <string name="cd_delete">حذف</string>
+    <string name="cd_edit">تعديل</string>
+    <string name="cd_info">التفاصيل</string>
+    <string name="action_edit">تعديل</string>
+    <string name="action_share">مشاركة</string>
+    <string name="action_delete">حذف</string>
+    <string name="action_info">التفاصيل</string>
+    <string name="action_save">حفظ نسخة</string>
+    <string name="action_cancel">إلغاء</string>
+    <string name="action_reset">إعادة ضبط</string>
+    <string name="action_apply">تطبيق</string>
+    <string name="action_done">تم</string>
+    <string name="delete_confirm_title">حذف الملف</string>
+    <string name="delete_confirm_message">هل أنت متأكد من حذف هذا الملف نهائيا من ذاكرة الجهاز؟</string>
+    <string name="delete_success">تم حذف الملف</string>
+    <string name="delete_failed">تعذر حذف الملف</string>
+    <string name="info_sheet_title">بيانات الوسائط</string>
+    <string name="info_filename">اسم الملف</string>
+    <string name="info_folder">المجلد</string>
+    <string name="info_format">الصيغة / MIME</string>
+    <string name="info_dimensions">الأبعاد</string>
+    <string name="info_size">حجم الملف</string>
+    <string name="info_date">تاريخ التعديل</string>
+    <string name="info_camera">الكاميرا / الجهاز</string>
+    <string name="info_exposure">التعريض / ISO</string>
+    <string name="info_focal">البعد البؤري / الفتحة</string>
+    <string name="info_duration">المدة</string>
+    <string name="info_unknown">غير متوفر</string>
+
+    <!-- Video & Audio Playback -->
+    <string name="cd_play">تشغيل</string>
+    <string name="cd_pause">إيقاف مؤقت</string>
+    <string name="cd_mute">كتم الصوت</string>
+    <string name="cd_unmute">إلغاء كتم الصوت</string>
+    <string name="cd_loop">تبديل التكرار</string>
+    <string name="cd_waveform">الموجة الصوتية</string>
+    <string name="playback_loop_on">التكرار مفعل</string>
+    <string name="playback_loop_off">التكرار متوقف</string>
+    <string name="playback_error">تعذر فك ترميز هذا الملف على الجهاز</string>
+
+    <!-- Photo Editor -->
+    <string name="photo_editor_title">محرر الصور</string>
+    <string name="editor_tool_crop">قص</string>
+    <string name="editor_tool_rotate">تدوير 90</string>
+    <string name="editor_tool_flip_h">قلب أفقي</string>
+    <string name="editor_tool_flip_v">قلب رأسي</string>
+    <string name="editor_tool_filters">فلاتر</string>
+    <string name="editor_tool_adjust">ضبط</string>
+    <string name="editor_tool_convert">تحويل</string>
+    <string name="adjust_brightness">السطوع</string>
+    <string name="adjust_contrast">التباين</string>
+    <string name="filter_original">الأصلي</string>
+    <string name="filter_mono">أحادي</string>
+    <string name="filter_warm">دافئ</string>
+    <string name="filter_cool">بارد</string>
+    <string name="filter_vivid">زاهي</string>
+    <string name="filter_sepia">سيبيا</string>
+    <string name="convert_target_format">صيغة الإخراج المطلوبة</string>
+    <string name="convert_quality">جودة الضغط</string>
+    <string name="export_saving">جار حفظ النسخة...</string>
+    <string name="export_saved_photo">تم حفظ النسخة في Pictures/GalleryX</string>
+    <string name="export_failed">فشل التصدير</string>
+
+    <!-- Video Editor & Transcoder -->
+    <string name="video_editor_title">محرر الفيديو</string>
+    <string name="video_trim_range">نطاق القص</string>
+    <string name="video_aspect_preset">نسبة العرض</string>
+    <string name="aspect_free">الأصلي</string>
+    <string name="aspect_square">1:1</string>
+    <string name="aspect_landscape">16:9</string>
+    <string name="aspect_portrait">9:16</string>
+    <string name="aspect_classic">4:3</string>
+    <string name="video_mode_transcode">تصدير فيديو</string>
+    <string name="video_mode_extract_audio">استخراج الصوت</string>
+    <string name="export_saved_video">تم حفظ نسخة الفيديو في Movies/GalleryX</string>
+    <string name="export_saved_audio">تم حفظ نسخة الصوت في Music/GalleryX</string>
+    <string name="export_progress">جار المعالجة %1$d%%</string>
+
+    <!-- Audio Editor & Converter -->
+    <string name="audio_editor_title">محرر الصوت</string>
+    <string name="audio_fade_in">تلاشي دخول (1.5 ث)</string>
+    <string name="audio_fade_out">تلاشي خروج (1.5 ث)</string>
+    <string name="audio_trim_start">البداية</string>
+    <string name="audio_trim_end">النهاية</string>
+
+    <!-- Capability Badges -->
+    <string name="cap_native_hw">ترميز أصلي</string>
+    <string name="cap_kotlin_enc">محول Kotlin مدمج</string>
+    <string name="cap_smart_fallback">بديل ذكي (%1$s)</string>
+
+    <!-- Settings & Personalization -->
+    <string name="settings_title">التخصيص</string>
+    <string name="settings_preview_title">معاينة المظهر المباشرة</string>
+    <string name="settings_preview_subtitle">معاينة الخلفية والنص واللون المميز و %1$d أعمدة</string>
+    <string name="settings_preview_chip">وسم تجريبي</string>
+    <string name="settings_theme_section">المظهر والألوان</string>
+    <string name="settings_use_custom_theme">لوحة ألوان مخصصة</string>
+    <string name="settings_use_custom_desc">تجاوز ألوان النظام الفاتحة أو الداكنة</string>
+    <string name="settings_bg_color">لون خلفية التطبيق</string>
+    <string name="settings_text_color">لون النص الأساسي</string>
+    <string name="settings_accent_color">اللون المميز</string>
+    <string name="settings_reset_colors">استعادة الألوان الافتراضية</string>
+    <string name="settings_layout_section">تخطيط الشبكة</string>
+    <string name="settings_grid_columns">عدد أعمدة الشبكة</string>
+    <string name="settings_columns_n">%1$d أعمدة</string>
+    <string name="settings_language_section">اللغة</string>
+    <string name="lang_system">لغة النظام الافتراضية</string>
+    <string name="lang_en">الإنجليزية (English)</string>
+    <string name="lang_fr">الفرنسية (Français)</string>
+    <string name="lang_ar">العربية</string>
+    <string name="settings_privacy_section">بنية بدون إنترنت</string>
+    <string name="settings_privacy_body">بلا أذونات شبكة، بلا تحليلات، وبلا مزامنة سحابية. تتم جميع عمليات العرض والتحرير والتحويل محليا على جهازك.</string>
+    <string name="color_picker_title">اختر لونا</string>
+    <string name="color_hex_label">رمز اللون (#RRGGBB)</string>
+    <string name="color_red">أحمر</string>
+    <string name="color_green">أخضر</string>
+    <string name="color_blue">أزرق</string>
+</resources>
